@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+export CLICOLOR=1
+export LSCOLORS=ExFxBxDxCxegedabagacad
+# TERMINAL PROMPT
+export PS1="\[\033[1;38;5;112m\][\t][\j]\[\033[0m\]\[\033[1;38;5;250m\]\w/\[\033[0m\]\[\033[1;38;5;112m\]$ \[\033[0m\]"
+: '
+function _update_ps1() {
+    PS1=$(powerline-shell $?)
+}
+
+if [[ $TERM != linux && ! $PROMPT_COMMAND =~ _update_ps1 ]]; then
+    PROMPT_COMMAND="_update_ps1; $PROMPT_COMMAND"
+fi
+export PS1;
+'
