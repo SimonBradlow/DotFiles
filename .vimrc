@@ -5,6 +5,8 @@ set mouse=a
 set nocompatible              " be iMproved, required
 filetype off                  " required
 
+set autochdir
+
 " set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -22,6 +24,8 @@ Plugin 'danro/rename.vim'
 Plugin 'roman/golden-ratio'
 Plugin 'ervandew/supertab'
 Plugin 'uiiaoo/java-syntax.vim'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'tpope/vim-fugitive'
 highlight link javaIdentifier NONE
 highlight link javaDelimiter NONE
 "highlight link javaConstant NONE
@@ -33,6 +37,19 @@ call vundle#end()            " required
 filetype plugin indent on    " required
 " To ignore plugin indent changes, instead use:
 "filetype plugin on
+
+"jcomment stuff
+"Plugin 'jcommenter.vim'
+autocmd FileType java let b:jcommenter_class_author='Simon Bradlow'
+autocmd FileType java let b:jcommenter_file_author='Simon Bradlow'
+autocmd FileType java source ~/.vim/bundle/jcommenter.vim/plugin/jcommenter.vim
+execute "set <M-j>=\ej"
+autocmd FileType java map <M-j> :call JCommentWriter()<CR>
+
+"ale stuff
+let g:ale_set_balloons = 1
+let g:ale_floating_preview = 1
+let g:ale_hover_to_floating_preview = 1
 
 "Makes golden ratio ignore things like NerdTree and Buffer list
 let g:golden_ratio_exclude_nonmodifiable = 1
@@ -68,7 +85,7 @@ let g:NERDTreeQuitOnOpen = 1
 autocmd StdinReadPre * let s:std_in=1
 autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
 
-map <C-B> :call CompileRunGcc()<CR>
+map <C-B> :call CompileRunGcc()<CR><CR>
 func! CompileRunGcc()
 exec "w"
 if &filetype == 'c'
@@ -80,8 +97,8 @@ exec "!time ./%<"
 elseif &filetype == 'java'
 exec "w"
 exec "cd %:h"
-exec "!javac %"
-exec "!time java %"
+exec "!javac -d bin *.java"
+exec "!time java -cp bin/ %"
 elseif &filetype == 'sh'
 exec "!time bash %"
 elseif &filetype == 'python'
@@ -96,6 +113,18 @@ exec "!~/.vim/markdown.pl % > %.html &"
 exec "!firefox %.html &"
 endif
 endfunc
+
+" TABS vs SPACES
+" Only do this part when compiled with support for autocommands.
+if has("autocmd")
+    " Use filetype detection and file-based automatic indenting.
+    filetype plugin indent on
+    " Use actual tab chars in Makefiles.
+    autocmd FileType make set tabstop=8 shiftwidth=8 softtabstop=0 noexpandtab
+endif
+
+" For everything else, use a tab width of 4 space chars.
+set tabstop=8 softtabstop=0 expandtab shiftwidth=4 smarttab
 
 """"""MANUALLY INSTALL SYNTAX FOR CPP
 "git clone https://github.com/octol/vim-cpp-enhanced-highlight.git /tmp/vim-cpp-enhanced-highlight
@@ -128,6 +157,9 @@ hi Todo ctermbg=236
 hi todo ctermfg=214
 "hi Directory ctermfg=70
 hi Directory ctermfg=112
+hi GitGutterAdd ctermbg=236 ctermfg=114
+hi GitGutterChange ctermbg=236 ctermfg=215
+hi GitGutterDelete ctermbg=236 ctermfg=167
 
 hi Type ctermfg=162
 "hi Type ctermfg=161
@@ -142,6 +174,7 @@ hi Statement ctermfg=162
 "hi Statement ctermfg=161
 hi PreProc ctermfg=172
 hi operator ctermfg=7
+hi Operator ctermfg=7
 hi special ctermfg=220
 hi constant ctermfg=140
 hi character ctermfg=220
