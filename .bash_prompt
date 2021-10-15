@@ -2,7 +2,80 @@
 export CLICOLOR=1
 export LSCOLORS=ExFxBxDxCxegedabagacad
 # TERMINAL PROMPT
-export PS1="\[\033[1;38;5;112m\][\t][\j]\[\033[0m\]\[\033[1;38;5;250m\]\w/\[\033[0m\]\[\033[1;38;5;112m\]$ \[\033[0m\]"
+# git clone https://github.com/magicmonty/bash-git-prompt.git ~/.bash-git-prompt --depth=1
+if [ -f "$HOME/.bash-git-prompt/gitprompt.sh" ]; then
+    GIT_PROMPT_ONLY_IN_REPO=1
+    source $HOME/.bash-git-prompt/gitprompt.sh
+fi
+
+   # Set config variables first
+   GIT_PROMPT_ONLY_IN_REPO=1
+
+   # GIT_PROMPT_FETCH_REMOTE_STATUS=0   # uncomment to avoid fetching remote status
+   # GIT_PROMPT_IGNORE_SUBMODULES=1 # uncomment to avoid searching for changed files in submodules
+   # GIT_PROMPT_WITH_VIRTUAL_ENV=0 # uncomment to avoid setting virtual environment infos for node/python/conda environments
+
+   # GIT_PROMPT_SHOW_UPSTREAM=1 # uncomment to show upstream tracking branch
+   # GIT_PROMPT_SHOW_UNTRACKED_FILES=normal # can be no, normal or all; determines counting of untracked files
+
+   # GIT_PROMPT_SHOW_CHANGED_FILES_COUNT=0 # uncomment to avoid printing the number of changed files
+
+   # GIT_PROMPT_STATUS_COMMAND=gitstatus_pre-1.7.10.sh # uncomment to support Git older than 1.7.10
+
+    GIT_PROMPT_START="\[\033[1;38;5;112m\][\t][\j]\[\033[0m\]\[\033[1;38;5;250m\]\$(split_pwd)/\[\033[0m\]"
+    GIT_PROMPT_END="\[\033[1;38;5;112m\]$ \[\033[0m\]"
+
+   # as last entry source the gitprompt script
+   # GIT_PROMPT_THEME=Custom # use custom theme specified in file GIT_PROMPT_THEME_FILE (default ~/.git-prompt-colors.sh)
+   # GIT_PROMPT_THEME_FILE=~/.git-prompt-colors.sh
+   # GIT_PROMPT_THEME=Solarized # use theme optimized for solarized color scheme
+   source ~/.bash-git-prompt/gitprompt.sh
+
+
+get_bash_w() {
+  # Returns the same working directory that the \W bash prompt command
+  echo $(pwd | sed 's@'"$HOME"'@~@')
+}
+
+split_pwd() {
+  # Split pwd into the first element, elipsis (...) and the last subfolder
+  # /usr/local/share/doc --> /usr/.../doc
+  # ~/project/folder/subfolder --> ~/project/../subfolder
+  split=2
+  W=$(get_bash_w)
+  if [ $(echo $W | grep -o '/' | wc -l) -gt $split ]; then
+    echo $W | cut -d'/' -f1-$split | xargs -I{} echo {}"/../${W##*/}"
+  else
+    echo $W
+  fi
+}
+
+parse_git_branch() {
+     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+}
+
+COLOR_RED="\033[0;31m"
+COLOR_YELLOW="\033[1;38;5;220m"
+COLOR_GREEN="\033[0;32m"
+COLOR_OCHRE="\033[1;38;5;125m"
+COLOR_WHITE="\033[0;37m"
+COLOR_RESET="\033[0m"
+
+function git_color {
+  local git_status="$(git status 2> /dev/null)"
+
+  if [[ ! $git_status =~ "nothing to commit" ]]; then
+    echo -e $COLOR_YELLOW
+  else
+    echo -e $COLOR_OCHRE
+  fi
+}
+
+PS1="\[\033[1;38;5;112m\][\t][\j]\[\033[0m\]"
+PS1+="\[\033[1;38;5;250m\]\$(split_pwd)/\[\033[0m\]"
+PS1+="\[\$(git_color)\]\$(parse_git_branch)\[\033[0m\]"
+PS1+="\[\033[1;38;5;112m\]$ \[\033[0m\]"
+export PS1
 : '
 function _update_ps1() {
     PS1=$(powerline-shell $?)
